@@ -1,0 +1,16 @@
+{
+  "singleQuote": true,
+  "printWidth": 100,
+  "importOrder": [
+    "\\./.+(j|t)sx?$",
+    "(c|sc)ss$",
+    ".graphql$",
+    "json$",
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff|mp4|webm|wav|mp3|m4a|aac|oga)(\\?.+)?$"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderCaseInsensitive": false,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "trailingComma": "es5"
+}

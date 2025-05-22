@@ -1,0 +1,80 @@
+{
+  //
+  // ************* GENERAL *************
+  //
+  "editor.tabSize": 2, // The number of spaces a tab is equal to.
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  // Controls if the diff editor shows changes in leading or trailing whitespace as diffs
+  "diffEditor.ignoreTrimWhitespace": false,
+  // this is a super annoying feature that you really want off if you open stuff from cmdline
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  // When enabled, will trim trailing whitespace when you save a file.
+  "files.trimTrailingWhitespace": true,
+  "breadcrumbs.enabled": true,
+
+  "files.associations": {
+    "*.py": "python"
+  },
+  "notebook.formatOnSave.enabled": true,
+  "notebook.defaultFormatter": "charliermarsh.ruff",
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit",
+    "notebook.source.organizeImports": "explicit"
+  },
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.formatOnPaste": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "ruff.importStrategy": "fromEnvironment",
+  "ruff.organizeImports": true,
+
+  "python.globalModuleInstallation": false,
+  "python.testing.autoTestDiscoverOnSaveEnabled": false,
+  "search.exclude": {
+    "dist": true,
+    "**/.vscode": true
+  },
+  "python.languageServer": "Pylance",
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportUnusedImport": "information",
+    "reportMissingImports": "none" // this ends up being incompatible with our system of different batch packages having different requirements
+  },
+
+  "html.format.indentHandlebars": true,
+
+  "javascript.format.enable": false,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferences.importModuleSpecifierEnding": "js",
+  "jestrunner.jestCommand": "yarn test --",
+  "jestrunner.debugOptions": {
+    "runtimeArgs": ["--experimental-vm-modules"]
+  },
+  "eslint.lintTask.enable": true,
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "[javascript][javascriptreact][typescript][typescriptreact]": {
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  // disable these because stylelint should check it instead
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "stylelint.validate": ["css", "scss"]
+}

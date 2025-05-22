@@ -1,0 +1,26 @@
+{
+  "repo-name-1": {
+    "path": "/path/to/repo-name-1",
+    "ignore_patterns": [
+      ".*\\.lock",
+      "dist/.*",
+      "build/.*"
+    ],
+    "name_mapping": {
+      "commitName1": "Author Name 1",
+      "commitName2": "Author Name 2"
+    }
+  },
+  "repo-name-2": {
+    "path": "/path/to/repo-name-2",
+    "ignore_patterns": [
+      ".*\\.lock",
+      "dist/.*",
+      "build/.*"
+    ],
+    "name_mapping": {
+      "commitName1": "Author Name 1",
+      "commitName2": "Author Name 2"
+    }
+  }
+}
