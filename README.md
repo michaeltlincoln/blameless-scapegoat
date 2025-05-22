@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 3. Copy repos configuration and configure:
 ```bash
-cp api/repos_config.example.json api/repos_config.json
+cp repos_config.example.json repos_config.json
 ```
 
 ### UI
@@ -41,9 +41,8 @@ yarn
 
 ## Loading Data
 
-1. After configuring your repos in api/repos_config.json, run the `calculate_blame.py` script:
+1. After configuring your repos in repos_config.json, run the `calculate_blame.py` script:
 
 ```bash
-cd api
 python calculate_blame.py <repo_name> -c <commit1> <commit2> ...
 ```

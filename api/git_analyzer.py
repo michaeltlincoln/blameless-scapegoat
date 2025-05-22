@@ -1,9 +1,18 @@
+import json
+import os
 import re
 from typing import List, Optional
 
 import tqdm
 from git import Repo
-from repos_config import REPOS_CONFIG_PATH, repos_config
+
+repos_config = {}
+ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+REPOS_CONFIG_PATH = os.path.join(ROOT_DIR, "repos_config.json")
+
+if os.path.exists(REPOS_CONFIG_PATH):
+    with open(REPOS_CONFIG_PATH, "r") as f:
+        repos_config = json.load(f)
 
 
 class GitAnalyzer:

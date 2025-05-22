@@ -2,8 +2,8 @@ import json
 import os
 import sqlite3
 
-DB_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(DB_DIR, "blameless.sqlite")
+ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+DB_PATH = os.path.join(ROOT_DIR, "blameless.sqlite")
 
 
 def dict_from_row(row):

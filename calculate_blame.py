@@ -1,10 +1,9 @@
 import argparse
 
-from db import init_db, insert_blame_analysis
-from git_analyzer import GitAnalyzer
+from api.db import init_db, insert_blame_analysis
+from api.git_analyzer import GitAnalyzer
 
-
-def parse_args():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze git blame for a repository")
     parser.add_argument("repo", help="Name of the repository to analyze")
     parser.add_argument(
@@ -13,11 +12,7 @@ def parse_args():
         nargs="+",
         help="Specific commit hashes to analyze",
     )
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
+    args = parser.parse_args()
 
     init_db()
     analyzer = GitAnalyzer(args.repo)
