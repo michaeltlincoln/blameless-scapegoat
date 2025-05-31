@@ -1,28 +1,35 @@
-import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 import { LineChart } from '@mui/x-charts/LineChart';
 import _ from 'lodash';
-import PropTypes from 'prop-types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useCommitSummary } from '../client.js';
+import { useRepo } from '../params.js';
+import GraphSettings from './GraphSettings.jsx';
 
-const Graph = ({ repo }) => {
+const Graph = () => {
+  const [repo] = useRepo();
   const { data, loading } = useCommitSummary(repo);
+  const [filteredDevelopers, setFilteredDevelopers] = useState(null);
 
   const developers = useMemo(
-    () => _.uniq(_.flatMap(data || [], (commit) => _.keys(commit.scoreboard))),
+    () =>
+      _.sortBy(_.uniq(_.flatMap(data || [], (commit) => _.keys(commit.scoreboard))), (dev) =>
+        dev.toLocaleLowerCase()
+      ),
     [data]
   );
 
   const series = useMemo(
     () =>
-      _.map(developers || [], (dev) => ({
+      _.map(filteredDevelopers ?? developers, (dev) => ({
         id: dev,
         label: dev,
         dataKey: dev,
+        showMark: false,
       })),
-    [developers]
+    [filteredDevelopers, developers]
   );
 
   const dataset = useMemo(
@@ -37,11 +44,18 @@ const Graph = ({ repo }) => {
     [data, developers]
   );
 
+  const latestCommit = useMemo(() => _.maxBy(data || [], 'commit_date'), [data]);
+
   if (loading) {
     return <Skeleton variant="rounded" width="100%" height="100%" />;
   }
   return (
-    <Box height="100%">
+    <Stack>
+      <GraphSettings
+        developers={developers}
+        latestCommit={latestCommit}
+        setFilteredDevelopers={setFilteredDevelopers}
+      />
       <LineChart
         dataset={dataset}
         xAxis={[
@@ -57,12 +71,8 @@ const Graph = ({ repo }) => {
         series={series}
         height={800}
       />
-    </Box>
+    </Stack>
   );
-};
-
-Graph.propTypes = {
-  repo: PropTypes.string.isRequired,
 };
 
 export default Graph;

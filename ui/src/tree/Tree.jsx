@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCommitBlame, useCommitSummary, useDirectoryStructure } from '../client.js';
+import { useRepo } from '../params.js';
 
 const NestedTreeItem = ({ parent, child, path }) => {
   const nextPath = [...path, parent];
@@ -34,7 +35,8 @@ NestedTreeItem.propTypes = {
   path: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-const Tree = ({ repo }) => {
+const Tree = () => {
+  const [repo] = useRepo();
   const [selectedCommit, setSelectedCommit] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -156,10 +158,6 @@ const Tree = ({ repo }) => {
       )}
     </Stack>
   );
-};
-
-Tree.propTypes = {
-  repo: PropTypes.string.isRequired,
 };
 
 export default Tree;

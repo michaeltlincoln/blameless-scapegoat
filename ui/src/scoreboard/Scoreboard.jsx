@@ -1,5 +1,7 @@
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,11 +10,13 @@ import TableFooter from '@mui/material/TableFooter';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
+import Tooltip from '@mui/material/Tooltip';
+import Zoom from '@mui/material/Zoom';
 import _ from 'lodash';
-import PropTypes from 'prop-types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useCommitSummary } from '../client.js';
+import { useRepo } from '../params.js';
 
 const getColors = (cols, idx, getCount) => {
   const prevCol = cols[idx + 1];
@@ -24,11 +28,15 @@ const getColors = (cols, idx, getCount) => {
   return { bgcolor: 'lightcoral', color: 'black' };
 };
 
-const Scoreboard = ({ repo }) => {
+const Scoreboard = () => {
+  const [repo] = useRepo();
   const [sortCommit, setSortCommit] = useState(null);
+  const [copiedHash, setCopiedHash] = useState(null);
 
   const onCompleted = useCallback((res) => {
-    setSortCommit((prev) => prev || _.maxBy(res, 'commit_date')?.commit_hash);
+    setSortCommit((prev) =>
+      _.some(prev, (c) => c.commit_hash === prev) ? prev : _.maxBy(res, 'commit_date')?.commit_hash
+    );
   }, []);
 
   const { data, loading } = useCommitSummary(repo, { onCompleted });
@@ -39,6 +47,7 @@ const Scoreboard = ({ repo }) => {
       ..._.map(_.orderBy(data || [], 'commit_date', 'desc'), (commit) => ({
         key: commit.commit_hash,
         title: new Date(commit.commit_date).toLocaleDateString(),
+        commitHash: commit.commit_hash,
         totalLines: commit.total_lines,
         totalFiles: commit.total_files,
       })),
@@ -66,6 +75,15 @@ const Scoreboard = ({ repo }) => {
     [data, developers, sortCommit]
   );
 
+  useEffect(() => {
+    if (copiedHash) {
+      const timeout = setTimeout(() => {
+        setCopiedHash(null);
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [copiedHash]);
+
   if (loading) {
     return <Skeleton variant="rounded" width="100%" height="100%" />;
   }
@@ -77,6 +95,24 @@ const Scoreboard = ({ repo }) => {
             <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
             {_.map(columns.slice(1), (col) => (
               <TableCell key={col.key} sx={{ fontWeight: 'bold' }}>
+                <Tooltip
+                  title={col.commitHash}
+                  placement="top-start"
+                  arrow
+                  onClick={() => {
+                    navigator.clipboard.writeText(col.commitHash);
+                    setCopiedHash(col.commitHash);
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" gap={0.2}>
+                    <pre style={{ margin: 0, fontSize: '0.6rem', cursor: 'pointer' }}>
+                      {col.commitHash.slice(0, 8)}
+                    </pre>
+                    <Zoom in={copiedHash === col.commitHash}>
+                      <CheckCircleIcon color="success" sx={{ fontSize: '0.8rem' }} />
+                    </Zoom>
+                  </Stack>
+                </Tooltip>
                 <TableSortLabel
                   active={col.key === sortCommit}
                   direction="desc"
@@ -141,10 +177,6 @@ const Scoreboard = ({ repo }) => {
       </Table>
     </TableContainer>
   );
-};
-
-Scoreboard.propTypes = {
-  repo: PropTypes.string.isRequired,
 };
 
 export default Scoreboard;
