@@ -44,13 +44,16 @@ const Scoreboard = () => {
   const columns = useMemo(
     () => [
       { key: 'name', title: 'Name' },
-      ..._.map(_.orderBy(data || [], 'commit_date', 'desc'), (commit) => ({
-        key: commit.commit_hash,
-        title: new Date(commit.commit_date).toLocaleDateString(),
-        commitHash: commit.commit_hash,
-        totalLines: commit.total_lines,
-        totalFiles: commit.total_files,
-      })),
+      ..._.map(
+        _.orderBy(data || [], (d) => new Date(d.commit_date), 'desc'),
+        (commit) => ({
+          key: commit.commit_hash,
+          title: new Date(commit.commit_date).toLocaleDateString(),
+          commitHash: commit.commit_hash,
+          totalLines: commit.total_lines,
+          totalFiles: commit.total_files,
+        })
+      ),
     ],
     [data]
   );
