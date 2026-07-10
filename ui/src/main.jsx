@@ -6,6 +6,7 @@ import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 
 import PageContainer from './PageContainer.jsx';
+import Developer from './developer/Developer.jsx';
 import Graph from './graph/Graph.jsx';
 import Scoreboard from './scoreboard/Scoreboard.jsx';
 import Tree from './tree/Tree.jsx';
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="/scoreboard" element={<Scoreboard />} />
               <Route path="/graph" element={<Graph />} />
               <Route path="/tree" element={<Tree />} />
+              <Route path="/developer" element={<Developer />} />
             </Route>
           </Routes>
         </ThemeProvider>

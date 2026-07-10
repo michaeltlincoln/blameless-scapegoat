@@ -18,6 +18,7 @@ const pages = [
   { title: 'Scoreboard', path: '/scoreboard' },
   { title: 'Graph', path: '/graph' },
   { title: 'Tree', path: '/tree' },
+  { title: 'Developer', path: '/developer' },
 ];
 
 const Nav = () => {
