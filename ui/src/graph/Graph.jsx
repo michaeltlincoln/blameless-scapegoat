@@ -44,7 +44,7 @@ const Graph = () => {
     [data, developers]
   );
 
-  const latestCommit = useMemo(() => _.maxBy(data || [], 'commit_date'), [data]);
+  const latestCommit = useMemo(() => _.maxBy(data || [], (d) => new Date(d.commit_date)), [data]);
 
   if (loading) {
     return <Skeleton variant="rounded" width="100%" height="100%" />;

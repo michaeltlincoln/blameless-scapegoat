@@ -1,15 +1,17 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useCommitBlame, useCommitSummary, useDirectoryStructure } from '../client.js';
 import { useRepo } from '../params.js';
@@ -40,8 +42,15 @@ const Tree = () => {
   const [selectedCommit, setSelectedCommit] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
 
+  useEffect(() => {
+    if (repo) {
+      setSelectedCommit('');
+      setSelectedItems([]);
+    }
+  }, [repo]);
+
   const onCompletedCommitSummary = useCallback((res) => {
-    setSelectedCommit((prev) => prev || _.maxBy(res, 'commit_date')?.commit_hash);
+    setSelectedCommit((prev) => prev || _.maxBy(res, (d) => new Date(d.commit_date))?.commit_hash);
   }, []);
 
   const onCompletedDirectoryStructure = useCallback((res) => {
@@ -106,11 +115,17 @@ const Tree = () => {
   );
 
   return (
-    <Stack spacing={2}>
-      {commitSummaryLoading ? (
-        <Skeleton variant="rounded" width="100%" height="50px" />
-      ) : (
-        <div>
+    <Stack direction="row" spacing={2} sx={{ height: '100%' }}>
+      <Stack
+        component={Paper}
+        overflow="auto"
+        spacing={2}
+        p={2}
+        sx={{ minHeight: 352, minWidth: 250 }}
+      >
+        {commitSummaryLoading ? (
+          <Skeleton variant="rounded" width="100%" height={50} sx={{ flexShrink: 0 }} />
+        ) : (
           <TextField
             select
             label="Commit"
@@ -119,27 +134,24 @@ const Tree = () => {
               setSelectedCommit(e.target.value);
               setSelectedItems([]);
             }}
-            sx={{ width: 200 }}
+            sx={{ width: '100%' }}
           >
-            {_.map(_.orderBy(commitSummary || [], 'commit_date', 'desc'), (commit) => (
-              <MenuItem key={commit.commit_hash} value={commit.commit_hash}>
-                {new Date(commit.commit_date).toLocaleDateString()}
-              </MenuItem>
-            ))}
+            {_.map(
+              _.orderBy(commitSummary || [], (d) => new Date(d.commit_date), 'desc'),
+              (commit) => (
+                <MenuItem key={commit.commit_hash} value={commit.commit_hash}>
+                  {new Date(commit.commit_date).toLocaleDateString()}
+                </MenuItem>
+              )
+            )}
           </TextField>
-        </div>
-      )}
-      {blameLoading || directoryStructureLoading ? (
-        <Skeleton variant="rounded" width="100%" height="100%" />
-      ) : !commitBlame || !directoryStructure ? null : (
-        <Stack direction="row" spacing={2}>
-          <Stack direction="column" spacing={2} sx={{ flexGrow: 1 }}>
-            <div>
-              <Button onClick={handleSelectAll}>
-                {selectedItems.length === 0 ? 'Select all' : 'Unselect all'}
-              </Button>
-            </div>
-            <Box sx={{ minHeight: 352, minWidth: 250 }}>
+        )}
+        {directoryStructureLoading ? (
+          <Skeleton variant="rounded" width="100%" height="100%" />
+        ) : !directoryStructure ? null : (
+          <Stack direction="column" sx={{ flexGrow: 1 }}>
+            <Typography variant="overline">{repo}</Typography>
+            <Box>
               <SimpleTreeView
                 selectedItems={selectedItems}
                 onSelectedItemsChange={handleSelectedItemsChange}
@@ -150,12 +162,19 @@ const Tree = () => {
                 ))}
               </SimpleTreeView>
             </Box>
+            <Button onClick={handleSelectAll} sx={{ mt: 1 }}>
+              {selectedItems.length === 0 ? 'Select all' : 'Unselect all'}
+            </Button>
           </Stack>
-          <Box sx={{ flexGrow: 1 }}>
-            <PieChart series={series} width={640} height={640} />
-          </Box>
-        </Stack>
-      )}
+        )}
+      </Stack>
+      <Stack flexGrow={1}>
+        {blameLoading ? (
+          <Skeleton variant="rounded" width="100%" height="100%" />
+        ) : commitBlame ? (
+          <PieChart series={series} width={640} height={640} />
+        ) : null}
+      </Stack>
     </Stack>
   );
 };

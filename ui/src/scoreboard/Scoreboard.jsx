@@ -35,7 +35,9 @@ const Scoreboard = () => {
 
   const onCompleted = useCallback((res) => {
     setSortCommit((prev) =>
-      _.some(prev, (c) => c.commit_hash === prev) ? prev : _.maxBy(res, 'commit_date')?.commit_hash
+      _.some(prev, (c) => c.commit_hash === prev)
+        ? prev
+        : _.maxBy(res, (d) => new Date(d.commit_date))?.commit_hash
     );
   }, []);
 
