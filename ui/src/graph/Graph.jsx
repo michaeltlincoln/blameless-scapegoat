@@ -2,7 +2,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { LineChart } from '@mui/x-charts/LineChart';
 import _ from 'lodash';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useCommitSummary } from '../client.js';
 import { useRepo } from '../params.js';
@@ -12,6 +12,13 @@ const Graph = () => {
   const [repo] = useRepo();
   const { data, loading } = useCommitSummary(repo);
   const [filteredDevelopers, setFilteredDevelopers] = useState(null);
+
+  useEffect(() => {
+    // Reset filtered developers when repo changes
+    if (repo) {
+      setFilteredDevelopers(null);
+    }
+  }, [repo]);
 
   const developers = useMemo(
     () =>
