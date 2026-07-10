@@ -16,16 +16,46 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCommitBlame, useCommitSummary, useDirectoryStructure } from '../client.js';
 import { useRepo } from '../params.js';
 
-const NestedTreeItem = ({ parent, child, path }) => {
-  const nextPath = [...path, parent];
+const NestedTreeItem = ({ parent, child, path, countsByFile = {} }) => {
+  const currPath = [...path, parent];
+  const currPathStr = currPath.join('/');
   const nextNodePairs = useMemo(
     () => (_.isString(child) ? [] : _.sortBy(_.toPairs(child || []), ([k]) => k)),
     [child]
   );
+  const count = useMemo(
+    () =>
+      Object.keys(countsByFile || {}).reduce((acc, filePath) => {
+        if (filePath.startsWith(currPathStr)) {
+          acc += countsByFile[filePath];
+        }
+        return acc;
+      }, 0),
+    [countsByFile, currPathStr]
+  );
+
   return (
-    <TreeItem itemId={nextPath.join('/')} label={parent}>
+    <TreeItem
+      itemId={currPathStr}
+      label={
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+          <Typography variant="body2" noWrap>
+            {parent}
+          </Typography>
+          <Typography variant="caption" color="text.disabled">
+            {count.toLocaleString()}
+          </Typography>
+        </Stack>
+      }
+    >
       {_.map(nextNodePairs || [], ([nextParent, nextChild]) => (
-        <NestedTreeItem key={nextParent} parent={nextParent} child={nextChild} path={nextPath} />
+        <NestedTreeItem
+          key={nextParent}
+          parent={nextParent}
+          child={nextChild}
+          path={currPath}
+          countsByFile={countsByFile}
+        />
       ))}
     </TreeItem>
   );
@@ -35,6 +65,7 @@ NestedTreeItem.propTypes = {
   parent: PropTypes.string.isRequired,
   child: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   path: PropTypes.arrayOf(PropTypes.string).isRequired,
+  countsByFile: PropTypes.objectOf(PropTypes.number),
 };
 
 const Tree = () => {
@@ -43,6 +74,7 @@ const Tree = () => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
+    // Reset local state when repo changes
     if (repo) {
       setSelectedCommit('');
       setSelectedItems([]);
@@ -97,6 +129,20 @@ const Tree = () => {
     [commitBlame, selectedItems]
   );
 
+  const countsByFile = useMemo(
+    () =>
+      _.reduce(
+        commitBlame,
+        (acc, b) => {
+          acc[b.file_path] = acc[b.file_path] || 0;
+          acc[b.file_path] += b.lines;
+          return acc;
+        },
+        {}
+      ),
+    [commitBlame]
+  );
+
   const totalLines = useMemo(() => _.sumBy(_.values(countsByAuthor)), [countsByAuthor]);
   const series = useMemo(
     () => [
@@ -146,7 +192,7 @@ const Tree = () => {
             )}
           </TextField>
         )}
-        {directoryStructureLoading ? (
+        {commitSummaryLoading || directoryStructureLoading ? (
           <Skeleton variant="rounded" width="100%" height="100%" />
         ) : !directoryStructure ? null : (
           <Stack direction="column" sx={{ flexGrow: 1 }}>
@@ -156,9 +202,16 @@ const Tree = () => {
                 selectedItems={selectedItems}
                 onSelectedItemsChange={handleSelectedItemsChange}
                 multiSelect
+                expansionTrigger="iconContainer"
               >
                 {_.map(rootNodes || [], ([parent, child]) => (
-                  <NestedTreeItem key={parent} parent={parent} child={child} path={[]} />
+                  <NestedTreeItem
+                    key={parent}
+                    parent={parent}
+                    child={child}
+                    path={[]}
+                    countsByFile={countsByFile}
+                  />
                 ))}
               </SimpleTreeView>
             </Box>
@@ -168,8 +221,8 @@ const Tree = () => {
           </Stack>
         )}
       </Stack>
-      <Stack flexGrow={1}>
-        {blameLoading ? (
+      <Stack flexGrow={1} overflow="auto">
+        {commitSummaryLoading || blameLoading ? (
           <Skeleton variant="rounded" width="100%" height="100%" />
         ) : commitBlame ? (
           <PieChart series={series} width={640} height={640} />
